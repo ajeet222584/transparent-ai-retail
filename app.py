@@ -18,36 +18,48 @@ if 'start_time' not in st.session_state: st.session_state['start_time'] = time.t
 if 'purchased' not in st.session_state: st.session_state['purchased'] = False
 
 # --- UI Setup ---
-st.set_page_config(page_title="ClearCart India Prototype", layout="wide")
+st.set_page_config(page_title="ClearCart India", layout="wide")
 st.title("🛒 ClearCart: Transparent AI Engine")
 st.markdown("### Context-Aware Retail with Algorithmic Nutrition Labels")
 
 # --- Load Indian Market Data ---
 @st.cache_resource
 def load_data():
-    # Built-in India-specific dataset
+    # Built-in India-specific dataset matching your request
     data = {
         'UserID': ['User_01', 'User_01', 'User_02', 'User_02', 'User_03', 'User_03', 'User_01'],
         'ProductID': ['P1', 'P2', 'P1', 'P3', 'P2', 'P3', 'P3'],
         'Rating': [5, 4, 3, 5, 4, 4, 5],
-        'ProductName': ['Lakmé Lumi Face Cream', 'Mamaearth Ubtan Face Wash', 'Lakmé Lumi Face Cream', 'Biotique Morning Nectar', 'Mamaearth Ubtan Face Wash', 'Biotique Morning Nectar', 'Biotique Morning Nectar'],
+        'ProductName': ['Lakme Lumi Lit Cream', 'Mamaearth Ubtan Face Wash', 'Lakme Lumi Lit Cream', 'Biotique Bio Sandalwood Sunscreen SPF 50', 'Mamaearth Ubtan Face Wash', 'Biotique Bio Sandalwood Sunscreen SPF 50', 'Biotique Bio Sandalwood Sunscreen SPF 50'],
         'ImageURL': [
-            'https://m.media-amazon.com/images/I/51wUqFhQWjL._SL1080_.jpg', 
-            'https://m.media-amazon.com/images/I/51n2xK+2cTL._SL1200_.jpg',
-            'https://m.media-amazon.com/images/I/51wUqFhQWjL._SL1080_.jpg',
-            'https://m.media-amazon.com/images/I/51nO60K3jYL._SL1000_.jpg',
-            'https://m.media-amazon.com/images/I/51n2xK+2cTL._SL1200_.jpg',
-            'https://m.media-amazon.com/images/I/51nO60K3jYL._SL1000_.jpg',
-            'https://m.media-amazon.com/images/I/51nO60K3jYL._SL1000_.jpg'
+            'https://m.media-amazon.com/images/I/41-lUu5W8xL._SX300_SY300_QL70_FMwebp_.jpg', # Lakme
+            'https://m.media-amazon.com/images/I/41KlsJ16fIL._SX300_SY300_QL70_FMwebp_.jpg', # Mamaearth
+            'https://m.media-amazon.com/images/I/41-lUu5W8xL._SX300_SY300_QL70_FMwebp_.jpg', # Lakme
+            'https://m.media-amazon.com/images/I/41e06O0BqIL._SX300_SY300_QL70_FMwebp_.jpg', # Biotique
+            'https://m.media-amazon.com/images/I/41KlsJ16fIL._SX300_SY300_QL70_FMwebp_.jpg', # Mamaearth
+            'https://m.media-amazon.com/images/I/41e06O0BqIL._SX300_SY300_QL70_FMwebp_.jpg', # Biotique
+            'https://m.media-amazon.com/images/I/41e06O0BqIL._SX300_SY300_QL70_FMwebp_.jpg'  # Biotique
         ],
+        'BasePrice': [262.00, 247.00, 262.00, 215.00, 247.00, 215.00, 215.00],
+        'StarRating': [4.3, 4.1, 4.3, 4.2, 4.1, 4.2, 4.2],
+        'TotalReviews': [14205, 8540, 14205, 12300, 8540, 12300, 12300],
         'Description': [
-            'A lightweight face cream with a hint of highlighter for a 3D glow.',
-            'Tan removal face wash with Turmeric & Saffron for all skin types.',
-            'A lightweight face cream with a hint of highlighter for a 3D glow.',
-            'Nourishing face lotion blended with pure honey, wheatgerm and seaweed.',
-            'Tan removal face wash with Turmeric & Saffron for all skin types.',
-            'Nourishing face lotion blended with pure honey, wheatgerm and seaweed.',
-            'Nourishing face lotion blended with pure honey, wheatgerm and seaweed.'
+            'Lakme Lumi Lit Cream is a lightweight face cream that works as a moisturizer and highlighter in one product. It contains ingredients such as niacinamide and hyaluronic acid, which help hydrate the skin and improve its texture.',
+            'Mamaearth Ubtan Natural Glow Face Wash is a natural face cleanser formulated with turmeric and saffron, inspired by traditional ubtan skincare. It helps remove dirt, excess oil, and impurities from the skin while promoting a natural glow.',
+            'Lakme Lumi Lit Cream is a lightweight face cream that works as a moisturizer and highlighter in one product. It contains ingredients such as niacinamide and hyaluronic acid, which help hydrate the skin and improve its texture.',
+            'Biotique Sun Shield Sandalwood Ultra Protective Face Lotion SPF 50+ is an Ayurvedic sunscreen designed to protect the skin from harmful UVA and UVB rays. Enriched with natural ingredients such as sandalwood, saffron, and honey.',
+            'Mamaearth Ubtan Natural Glow Face Wash is a natural face cleanser formulated with turmeric and saffron, inspired by traditional ubtan skincare. It helps remove dirt, excess oil, and impurities from the skin while promoting a natural glow.',
+            'Biotique Sun Shield Sandalwood Ultra Protective Face Lotion SPF 50+ is an Ayurvedic sunscreen designed to protect the skin from harmful UVA and UVB rays. Enriched with natural ingredients such as sandalwood, saffron, and honey.',
+            'Biotique Sun Shield Sandalwood Ultra Protective Face Lotion SPF 50+ is an Ayurvedic sunscreen designed to protect the skin from harmful UVA and UVB rays. Enriched with natural ingredients such as sandalwood, saffron, and honey.'
+        ],
+        'KeyBenefits': [
+            'Moisturizes and hydrates the skin\nProvides instant glow and radiance\nCan be used as a primer or daily cream',
+            'Cleanses dirt and oil from the skin\nHelps remove tan and brighten skin\nContains natural ingredients like turmeric and saffron',
+            'Moisturizes and hydrates the skin\nProvides instant glow and radiance\nCan be used as a primer or daily cream',
+            'Protects skin from harmful UV rays\nPrevents sunburn and tanning\nKeeps skin soft and moisturized',
+            'Cleanses dirt and oil from the skin\nHelps remove tan and brighten skin\nContains natural ingredients like turmeric and saffron',
+            'Protects skin from harmful UV rays\nPrevents sunburn and tanning\nKeeps skin soft and moisturized',
+            'Protects skin from harmful UV rays\nPrevents sunburn and tanning\nKeeps skin soft and moisturized'
         ]
     }
     df = pd.DataFrame(data)
@@ -75,39 +87,56 @@ skin_type = st.sidebar.selectbox("Skin Type:", ["Oily", "Dry", "Combination", "S
 purpose = st.sidebar.radio("Purpose:", ["For Myself", "As a Gift"])
 season = st.sidebar.selectbox("Current Season:", ["Summer", "Monsoon", "Winter"])
 
-# --- Main Storefront ---
+# --- Main Storefront UI ---
+# Determine which product to show based on the persona selected
 user_data = df[df['UserID'] == sample_user].iloc[0]
-base_price_inr = 499.00 
+base_price_inr = user_data['BasePrice']
 
-st.subheader("✨ Context-Aware Recommendation")
-st.write(f"Based on your **{skin_type}** skin during the **{season}**, we recommend:")
+st.subheader("✨ Recommended for You")
+st.caption(f"Based on your **{skin_type}** skin during the **{season}** season")
 
-colA, colB = st.columns([1, 2])
-with colA:
-    st.image(user_data['ImageURL'], width=200)
-with colB:
-    st.markdown(f"### {user_data['ProductName']}")
-    st.write(user_data['Description'])
+# Layout to look like Amazon/Flipkart
+col_img, col_info = st.columns([1, 2.5])
+
+with col_img:
+    st.image(user_data['ImageURL'], width=250)
+
+with col_info:
+    st.markdown(f"## {user_data['ProductName']}")
+    # Fake Star Rating Display
+    st.write(f"⭐⭐⭐⭐⭐ **{user_data['StarRating']}** ({user_data['TotalReviews']:,} ratings)")
+    st.markdown(f"#### MRP: ₹{base_price_inr:.2f}")
+    
+    with st.expander("📝 Product Description", expanded=True):
+        st.write(user_data['Description'])
+        st.markdown("**Key Benefits:**")
+        # Split the string of benefits into bullet points
+        for benefit in user_data['KeyBenefits'].split('\n'):
+            st.markdown(f"- {benefit}")
     
 # --- The Data Dividend Feature ---
 st.write("---")
 st.markdown("### 🛡️ Privacy Controls & Data Dividend")
-st.write("Turn off your data to increase privacy, but lose your personalized discount.")
+st.info("Retailers use your data to predict what you want. Turn off your data to increase privacy, but lose your personalized discount.")
 
 col1, col2 = st.columns(2)
 with col1:
     share_history = st.toggle("Share my Purchase History", value=True)
     share_behavior = st.toggle("Share my Rating Behavior", value=True)
 
-discount_inr = 0
-if share_history: discount_inr += 50.00
-if share_behavior: discount_inr += 35.00
+# Calculate discount logic (Max 20% discount if they share everything)
+discount_pct = 0
+if share_history: discount_pct += 0.12 # 12% off
+if share_behavior: discount_pct += 0.08 # 8% off
+
+discount_inr = base_price_inr * discount_pct
 final_price_inr = base_price_inr - discount_inr
 
 with col2:
-    st.metric(label="Final Price", value=f"₹{final_price_inr:.2f}", delta=f"-₹{discount_inr:.2f} Data Dividend" if discount_inr > 0 else "No Discount")
+    st.metric(label="Your Price Today", value=f"₹{final_price_inr:.2f}", delta=f"-₹{discount_inr:.2f} Data Dividend" if discount_inr > 0 else "No Discount")
 
 # --- XAI Explanation ---
+st.write("---")
 if st.button("🧐 Generate AI Explanation (Nutrition Label)"):
     user_item_features = X.iloc[[user_data.name]].copy()
     if not share_history: user_item_features['Item_Total_Reviews'] = 0 
@@ -130,7 +159,6 @@ if st.button("🧐 Generate AI Explanation (Nutrition Label)"):
 st.write("---")
 if not st.session_state['purchased']:
     if st.button("🛒 Buy Now", type="primary"):
-        # Calculate time taken
         time_taken = round(time.time() - st.session_state['start_time'], 2)
         st.session_state['time_taken'] = time_taken
         st.session_state['purchased'] = True
