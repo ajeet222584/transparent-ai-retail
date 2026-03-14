@@ -25,6 +25,8 @@ st.markdown("### Context-Aware Retail with Algorithmic Nutrition Labels")
 # --- Load Indian Market Data ---
 @st.cache_resource
 def load_data():
+    # Final optimized data structure using three unique generated images
+    # User 1 -> Lakme (P1), User 2 -> Biotique (P3), User 3 -> Mamaearth (P2)
     data = {
         'UserID': ['User_01', 'User_02', 'User_03', 'User_01', 'User_02', 'User_03', 'User_01'],
         'ProductID': ['P1', 'P3', 'P2', 'P3', 'P1', 'P1', 'P2'],
@@ -39,13 +41,13 @@ def load_data():
             'Mamaearth Ubtan Face Wash'
         ],
         'ImageURL': [
-            'https://images.unsplash.com/photo-1608248593842-8021b4a0f878?q=80&w=400', # High-quality cream jar
-            'https://images.unsplash.com/photo-1556228578-0d85b1a4d571?q=80&w=400', # High-quality sunscreen bottle
-            'https://images.unsplash.com/photo-1556228720-192a6af4e865?q=80&w=400', # High-quality face wash tube
-            'https://images.unsplash.com/photo-1556228578-0d85b1a4d571?q=80&w=400', 
-            'https://images.unsplash.com/photo-1608248593842-8021b4a0f878?q=80&w=400', 
-            'https://images.unsplash.com/photo-1608248593842-8021b4a0f878?q=80&w=400', 
-            'https://images.unsplash.com/photo-1556228720-192a6af4e865?q=80&w=400'  
+            'image_0.png', # Unique High-End Lakme Jar
+            'image_2.png', # Unique High-End Biotique Bottle (Replaced your previous dislike!)
+            'image_1.png', # Unique High-End Mamaearth Tube
+            'image_2.png', # Biotique (Used as a recommendation factor for other users)
+            'image_0.png', # Lakme
+            'image_0.png', # Lakme
+            'image_1.png'  # Mamaearth
         ],
         'BasePrice': [262.00, 215.00, 247.00, 215.00, 262.00, 262.00, 247.00],
         'StarRating': [4.3, 4.2, 4.1, 4.2, 4.3, 4.3, 4.1],
@@ -95,6 +97,7 @@ purpose = st.sidebar.radio("Purpose:", ["For Myself", "As a Gift"])
 season = st.sidebar.selectbox("Current Season:", ["Summer", "Monsoon", "Winter"])
 
 # --- Main Storefront UI ---
+# Grab the very first row for the selected persona so the products map correctly
 user_data = df[df['UserID'] == sample_user].iloc[0]
 base_price_inr = user_data['BasePrice']
 
@@ -105,11 +108,12 @@ st.caption(f"Based on your **{skin_type}** skin during the **{season}** season")
 col_img, col_info = st.columns([1, 2.5])
 
 with col_img:
-    # 100% Guaranteed Image Load
+    # 100% Guaranteed Image Load (Internal system generated images)
     st.image(user_data['ImageURL'], width=250)
 
 with col_info:
     st.markdown(f"## {user_data['ProductName']}")
+    # Fake Star Rating Display
     st.write(f"⭐⭐⭐⭐⭐ **{user_data['StarRating']}** ({user_data['TotalReviews']:,} ratings)")
     st.markdown(f"#### MRP: ₹{base_price_inr:.2f}")
     
