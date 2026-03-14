@@ -3,32 +3,38 @@ import pandas as pd
 import numpy as np
 from sklearn.ensemble import RandomForestRegressor
 import shap
+import uuid
+from supabase import create_client, Client
+
+# --- Database Setup ---
+SUPABASE_URL = "https://lkvoedulqrordxjuqvgx.supabase.co"
+SUPABASE_KEY = "sb_publishable_tbpKlNGTY0fVYe88PgUyTw_nS2OP5Ef"
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+# Generate an anonymous ID for the user's session
+if 'session_id' not in st.session_state:
+    st.session_state['session_id'] = str(uuid.uuid4())
 
 # --- UI Setup ---
-st.set_page_config(page_title="Transparent AI Retail", layout="wide")
-st.title("🛍️ Transparent AI E-Commerce Engine")
-st.markdown("### The 'Algorithmic Nutrition Label' & Data Dividend Prototype")
+st.set_page_config(page_title="ClearCart Research Prototype", layout="wide")
+st.title("🛒 ClearCart: Transparent AI Engine")
+st.markdown("### The Algorithmic Nutrition Label & Data Dividend Prototype")
 
 # --- Load Data & Train Model ---
 @st.cache_resource
 def load_and_train():
     try:
-        # Try to load the real file
         file_path = r"D:\Resarch work\Research paper 2026\Kaggel\archive\amazon_beauty_clean.csv"
         df = pd.read_csv(file_path)
+        if len(df.columns) < 3: raise ValueError("CSV columns squished.")
         
-        if len(df.columns) < 3:
-            raise ValueError("CSV columns are squished.")
-            
         rename_mapping = {
             'user_id': 'UserID', 'parent_asin': 'ProductID', 
             'rating': 'Rating', 'product_name': 'ProductName', 'title': 'ProductName'
         }
         df = df.rename(columns=rename_mapping)
         df = df[['UserID', 'ProductID', 'Rating', 'ProductName']].dropna()
-        
     except Exception:
-        # 🚨 THE FALLBACK: Pure data, no UI pop-ups allowed in this cached function!
         data = {
             'UserID': ['User_01', 'User_01', 'User_02', 'User_02', 'User_03', 'User_03', 'User_01'],
             'ProductID': ['B001', 'B002', 'B001', 'B003', 'B002', 'B003', 'B003'],
@@ -37,7 +43,6 @@ def load_and_train():
         }
         df = pd.DataFrame(data)
         
-    # --- Feature Engineering ---
     item_stats = df.groupby('ProductID').agg(Item_Avg_Rating=('Rating', 'mean'), Item_Total_Reviews=('Rating', 'count')).reset_index()
     user_stats = df.groupby('UserID').agg(User_Avg_Rating=('Rating', 'mean'), User_Total_Reviews=('Rating', 'count')).reset_index()
     df = df.merge(item_stats, on='ProductID').merge(user_stats, on='UserID')
@@ -46,10 +51,8 @@ def load_and_train():
     X = df[features]
     y = df['Rating']
     
-    # --- Train the AI ---
     model = RandomForestRegressor(n_estimators=50, max_depth=5, random_state=42)
     model.fit(X, y)
-    
     explainer = shap.TreeExplainer(model)
     return df, model, explainer, features, X
 
@@ -58,6 +61,7 @@ with st.spinner("Initializing AI Engine..."):
 
 # --- Storefront UI ---
 st.sidebar.header("👤 Shopper Profile")
+st.sidebar.caption(f"Session ID: `{st.session_state['session_id'][:8]}...`")
 sample_user = st.sidebar.selectbox("Select a User ID to simulate:", df['UserID'].unique())
 
 user_data = df[df['UserID'] == sample_user].iloc[0]
@@ -90,12 +94,22 @@ st.markdown("### 🧐 Algorithmic Nutrition Label")
 st.write("Why exactly are we recommending this item to you?")
 
 if st.button("Generate AI Explanation"):
+    # 1. LOG THE DATA TO SUPABASE SILENTLY
+    try:
+        supabase.table('user_interactions').insert({
+            "session_id": st.session_state['session_id'],
+            "shared_history": share_history,
+            "shared_behavior": share_behavior,
+            "final_price": float(final_price),
+            "viewed_explanation": True
+        }).execute()
+    except Exception as e:
+        print(f"Database logging error: {e}") # Fails silently so user isn't disrupted
+        
+    # 2. RUN THE AI LOGIC
     user_item_features = X.iloc[[user_data.name]].copy()
-    
-    if not share_history:
-        user_item_features['Item_Total_Reviews'] = 0 
-    if not share_behavior:
-        user_item_features['User_Avg_Rating'] = 3.0 
+    if not share_history: user_item_features['Item_Total_Reviews'] = 0 
+    if not share_behavior: user_item_features['User_Avg_Rating'] = 3.0 
         
     predicted_score = model.predict(user_item_features)[0]
     shap_values = explainer.shap_values(user_item_features)
@@ -112,3 +126,6 @@ if st.button("Generate AI Explanation"):
             st.info(f"⬆️ **{feature}** increased your match score by {abs(shap_val):.2f}")
         elif shap_val < -0.05:
             st.warning(f"⬇️ **{feature}** decreased your match score by {abs(shap_val):.2f}")
+
+st.write("---")
+st.caption("*Note: This is a research prototype. Anonymous interaction data (toggles clicked, features viewed) is collected for academic research purposes. No personal identifiable information (PII) is stored.*")
