@@ -4,6 +4,7 @@ import numpy as np
 from sklearn.ensemble import RandomForestRegressor
 import shap
 import uuid
+import time
 from supabase import create_client, Client
 
 # --- Database Setup ---
@@ -11,38 +12,46 @@ SUPABASE_URL = "https://lkvoedulqrordxjuqvgx.supabase.co"
 SUPABASE_KEY = "sb_publishable_tbpKlNGTY0fVYe88PgUyTw_nS2OP5Ef"
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-# Generate an anonymous ID for the user's session
-if 'session_id' not in st.session_state:
-    st.session_state['session_id'] = str(uuid.uuid4())
+# --- Session State (Memory) ---
+if 'session_id' not in st.session_state: st.session_state['session_id'] = str(uuid.uuid4())
+if 'start_time' not in st.session_state: st.session_state['start_time'] = time.time()
+if 'purchased' not in st.session_state: st.session_state['purchased'] = False
 
 # --- UI Setup ---
-st.set_page_config(page_title="ClearCart Research Prototype", layout="wide")
+st.set_page_config(page_title="ClearCart India Prototype", layout="wide")
 st.title("🛒 ClearCart: Transparent AI Engine")
-st.markdown("### The Algorithmic Nutrition Label & Data Dividend Prototype")
+st.markdown("### Context-Aware Retail with Algorithmic Nutrition Labels")
 
-# --- Load Data & Train Model ---
+# --- Load Indian Market Data ---
 @st.cache_resource
-def load_and_train():
-    try:
-        file_path = r"D:\Resarch work\Research paper 2026\Kaggel\archive\amazon_beauty_clean.csv"
-        df = pd.read_csv(file_path)
-        if len(df.columns) < 3: raise ValueError("CSV columns squished.")
-        
-        rename_mapping = {
-            'user_id': 'UserID', 'parent_asin': 'ProductID', 
-            'rating': 'Rating', 'product_name': 'ProductName', 'title': 'ProductName'
-        }
-        df = df.rename(columns=rename_mapping)
-        df = df[['UserID', 'ProductID', 'Rating', 'ProductName']].dropna()
-    except Exception:
-        data = {
-            'UserID': ['User_01', 'User_01', 'User_02', 'User_02', 'User_03', 'User_03', 'User_01'],
-            'ProductID': ['B001', 'B002', 'B001', 'B003', 'B002', 'B003', 'B003'],
-            'Rating': [5, 4, 3, 5, 4, 4, 5],
-            'ProductName': ['Herbivore Sea Mist', 'Vegan Dry Shampoo', 'Herbivore Sea Mist', 'Creamsicle Lip Balm', 'Vegan Dry Shampoo', 'Creamsicle Lip Balm', 'Creamsicle Lip Balm']
-        }
-        df = pd.DataFrame(data)
-        
+def load_data():
+    # Built-in India-specific dataset
+    data = {
+        'UserID': ['User_01', 'User_01', 'User_02', 'User_02', 'User_03', 'User_03', 'User_01'],
+        'ProductID': ['P1', 'P2', 'P1', 'P3', 'P2', 'P3', 'P3'],
+        'Rating': [5, 4, 3, 5, 4, 4, 5],
+        'ProductName': ['Lakmé Lumi Face Cream', 'Mamaearth Ubtan Face Wash', 'Lakmé Lumi Face Cream', 'Biotique Morning Nectar', 'Mamaearth Ubtan Face Wash', 'Biotique Morning Nectar', 'Biotique Morning Nectar'],
+        'ImageURL': [
+            'https://m.media-amazon.com/images/I/51wUqFhQWjL._SL1080_.jpg', 
+            'https://m.media-amazon.com/images/I/51n2xK+2cTL._SL1200_.jpg',
+            'https://m.media-amazon.com/images/I/51wUqFhQWjL._SL1080_.jpg',
+            'https://m.media-amazon.com/images/I/51nO60K3jYL._SL1000_.jpg',
+            'https://m.media-amazon.com/images/I/51n2xK+2cTL._SL1200_.jpg',
+            'https://m.media-amazon.com/images/I/51nO60K3jYL._SL1000_.jpg',
+            'https://m.media-amazon.com/images/I/51nO60K3jYL._SL1000_.jpg'
+        ],
+        'Description': [
+            'A lightweight face cream with a hint of highlighter for a 3D glow.',
+            'Tan removal face wash with Turmeric & Saffron for all skin types.',
+            'A lightweight face cream with a hint of highlighter for a 3D glow.',
+            'Nourishing face lotion blended with pure honey, wheatgerm and seaweed.',
+            'Tan removal face wash with Turmeric & Saffron for all skin types.',
+            'Nourishing face lotion blended with pure honey, wheatgerm and seaweed.',
+            'Nourishing face lotion blended with pure honey, wheatgerm and seaweed.'
+        ]
+    }
+    df = pd.DataFrame(data)
+    
     item_stats = df.groupby('ProductID').agg(Item_Avg_Rating=('Rating', 'mean'), Item_Total_Reviews=('Rating', 'count')).reset_index()
     user_stats = df.groupby('UserID').agg(User_Avg_Rating=('Rating', 'mean'), User_Total_Reviews=('Rating', 'count')).reset_index()
     df = df.merge(item_stats, on='ProductID').merge(user_stats, on='UserID')
@@ -50,63 +59,56 @@ def load_and_train():
     features = ['Item_Avg_Rating', 'Item_Total_Reviews', 'User_Avg_Rating', 'User_Total_Reviews']
     X = df[features]
     y = df['Rating']
-    
     model = RandomForestRegressor(n_estimators=50, max_depth=5, random_state=42)
     model.fit(X, y)
     explainer = shap.TreeExplainer(model)
     return df, model, explainer, features, X
 
-with st.spinner("Initializing AI Engine..."):
-    df, model, explainer, features, X = load_and_train()
+df, model, explainer, features, X = load_data()
 
-# --- Storefront UI ---
+# --- Sidebar: User Context ---
 st.sidebar.header("👤 Shopper Profile")
-st.sidebar.caption(f"Session ID: `{st.session_state['session_id'][:8]}...`")
-sample_user = st.sidebar.selectbox("Select a User ID to simulate:", df['UserID'].unique())
+sample_user = st.sidebar.selectbox("Select User Persona:", df['UserID'].unique(), help="Simulates different user rating histories.")
 
+st.sidebar.markdown("### Contextual Input")
+skin_type = st.sidebar.selectbox("Skin Type:", ["Oily", "Dry", "Combination", "Sensitive"])
+purpose = st.sidebar.radio("Purpose:", ["For Myself", "As a Gift"])
+season = st.sidebar.selectbox("Current Season:", ["Summer", "Monsoon", "Winter"])
+
+# --- Main Storefront ---
 user_data = df[df['UserID'] == sample_user].iloc[0]
-product_name = user_data['ProductName']
-base_price = 45.00 
+base_price_inr = 499.00 
 
-st.subheader(f"✨ Recommended for You: **{product_name}**")
+st.subheader("✨ Context-Aware Recommendation")
+st.write(f"Based on your **{skin_type}** skin during the **{season}**, we recommend:")
 
+colA, colB = st.columns([1, 2])
+with colA:
+    st.image(user_data['ImageURL'], width=200)
+with colB:
+    st.markdown(f"### {user_data['ProductName']}")
+    st.write(user_data['Description'])
+    
 # --- The Data Dividend Feature ---
 st.write("---")
 st.markdown("### 🛡️ Privacy Controls & Data Dividend")
-st.write("Retailers use your data to predict what you want. Turn off your data to increase privacy, but lose your personalized discount.")
+st.write("Turn off your data to increase privacy, but lose your personalized discount.")
 
 col1, col2 = st.columns(2)
 with col1:
-    share_history = st.toggle("Share my Purchase History (Boosts AI Accuracy)", value=True)
+    share_history = st.toggle("Share my Purchase History", value=True)
     share_behavior = st.toggle("Share my Rating Behavior", value=True)
 
-discount = 0
-if share_history: discount += 5.00
-if share_behavior: discount += 3.50
-final_price = base_price - discount
+discount_inr = 0
+if share_history: discount_inr += 50.00
+if share_behavior: discount_inr += 35.00
+final_price_inr = base_price_inr - discount_inr
 
 with col2:
-    st.metric(label="Current Price", value=f"${final_price:.2f}", delta=f"-${discount:.2f} Data Dividend" if discount > 0 else "No Discount")
+    st.metric(label="Final Price", value=f"₹{final_price_inr:.2f}", delta=f"-₹{discount_inr:.2f} Data Dividend" if discount_inr > 0 else "No Discount")
 
-# --- The Algorithmic Nutrition Label ---
-st.write("---")
-st.markdown("### 🧐 Algorithmic Nutrition Label")
-st.write("Why exactly are we recommending this item to you?")
-
-if st.button("Generate AI Explanation"):
-    # 1. LOG THE DATA TO SUPABASE SILENTLY
-    try:
-        supabase.table('user_interactions').insert({
-            "session_id": st.session_state['session_id'],
-            "shared_history": share_history,
-            "shared_behavior": share_behavior,
-            "final_price": float(final_price),
-            "viewed_explanation": True
-        }).execute()
-    except Exception as e:
-        print(f"Database logging error: {e}") # Fails silently so user isn't disrupted
-        
-    # 2. RUN THE AI LOGIC
+# --- XAI Explanation ---
+if st.button("🧐 Generate AI Explanation (Nutrition Label)"):
     user_item_features = X.iloc[[user_data.name]].copy()
     if not share_history: user_item_features['Item_Total_Reviews'] = 0 
     if not share_behavior: user_item_features['User_Avg_Rating'] = 3.0 
@@ -114,18 +116,52 @@ if st.button("Generate AI Explanation"):
     predicted_score = model.predict(user_item_features)[0]
     shap_values = explainer.shap_values(user_item_features)
     
-    st.success(f"**AI Match Score:** {predicted_score:.2f} out of 5.0 Stars")
+    st.success(f"**AI Match Score:** {predicted_score:.2f} / 5.0 Stars")
     
     base_val = explainer.expected_value
     if isinstance(base_val, (list, np.ndarray)): base_val = base_val[0]
     current_shap = shap_values[0] if len(np.shape(shap_values)) > 1 else shap_values
     
-    st.write(f"**Starting AI Baseline:** {base_val:.2f} Stars")
     for feature, shap_val in zip(features, current_shap):
-        if shap_val > 0.05:
-            st.info(f"⬆️ **{feature}** increased your match score by {abs(shap_val):.2f}")
-        elif shap_val < -0.05:
-            st.warning(f"⬇️ **{feature}** decreased your match score by {abs(shap_val):.2f}")
+        if shap_val > 0.05: st.info(f"⬆️ **{feature}** increased match by {abs(shap_val):.2f}")
+        elif shap_val < -0.05: st.warning(f"⬇️ **{feature}** decreased match by {abs(shap_val):.2f}")
 
+# --- Purchase & Research Survey ---
 st.write("---")
-st.caption("*Note: This is a research prototype. Anonymous interaction data (toggles clicked, features viewed) is collected for academic research purposes. No personal identifiable information (PII) is stored.*")
+if not st.session_state['purchased']:
+    if st.button("🛒 Buy Now", type="primary"):
+        # Calculate time taken
+        time_taken = round(time.time() - st.session_state['start_time'], 2)
+        st.session_state['time_taken'] = time_taken
+        st.session_state['purchased'] = True
+        st.rerun()
+
+if st.session_state['purchased']:
+    st.success("🎉 Purchase Successful! Please help our research by answering 5 quick questions.")
+    
+    with st.form("research_survey"):
+        st.write("*(1 = Strongly Disagree, 7 = Strongly Agree)*")
+        q1 = st.slider("1. I understood why the AI recommended this product.", 1, 7, 4)
+        q2 = st.slider("2. I felt in control of my personal data.", 1, 7, 4)
+        q3 = st.slider("3. The 'Data Dividend' discount was a fair trade for my data.", 1, 7, 4)
+        q4 = st.slider("4. The AI Explanation increased my trust in the retailer.", 1, 7, 4)
+        q5 = st.slider("5. I would prefer shopping at stores that offer this transparency.", 1, 7, 4)
+        
+        if st.form_submit_button("Submit Survey & Save Data"):
+            try:
+                # Push ALL data to Supabase
+                supabase.table('user_interactions').insert({
+                    "session_id": st.session_state['session_id'],
+                    "shared_history": share_history,
+                    "shared_behavior": share_behavior,
+                    "final_price": float(final_price_inr),
+                    "time_taken_seconds": st.session_state['time_taken'],
+                    "purchased": True,
+                    "skin_type": skin_type,
+                    "purpose": purpose,
+                    "survey_q1": q1, "survey_q2": q2, "survey_q3": q3, "survey_q4": q4, "survey_q5": q5
+                }).execute()
+                st.balloons()
+                st.info("✅ Data successfully saved to Supabase! Thank you for participating.")
+            except Exception as e:
+                st.error(f"Error saving to database: {e}")
