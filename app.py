@@ -25,41 +25,49 @@ st.markdown("### Context-Aware Retail with Algorithmic Nutrition Labels")
 # --- Load Indian Market Data ---
 @st.cache_resource
 def load_data():
-    # Built-in India-specific dataset matching your request
+    # Reordered so User 1 = Lakme, User 2 = Biotique, User 3 = Mamaearth
     data = {
-        'UserID': ['User_01', 'User_01', 'User_02', 'User_02', 'User_03', 'User_03', 'User_01'],
-        'ProductID': ['P1', 'P2', 'P1', 'P3', 'P2', 'P3', 'P3'],
+        'UserID': ['User_01', 'User_02', 'User_03', 'User_01', 'User_02', 'User_03', 'User_01'],
+        'ProductID': ['P1', 'P3', 'P2', 'P3', 'P1', 'P1', 'P2'],
         'Rating': [5, 4, 3, 5, 4, 4, 5],
-        'ProductName': ['Lakme Lumi Lit Cream', 'Mamaearth Ubtan Face Wash', 'Lakme Lumi Lit Cream', 'Biotique Bio Sandalwood Sunscreen SPF 50', 'Mamaearth Ubtan Face Wash', 'Biotique Bio Sandalwood Sunscreen SPF 50', 'Biotique Bio Sandalwood Sunscreen SPF 50'],
-        'ImageURL': [
-            'https://m.media-amazon.com/images/I/41-lUu5W8xL._SX300_SY300_QL70_FMwebp_.jpg', # Lakme
-            'https://m.media-amazon.com/images/I/41KlsJ16fIL._SX300_SY300_QL70_FMwebp_.jpg', # Mamaearth
-            'https://m.media-amazon.com/images/I/41-lUu5W8xL._SX300_SY300_QL70_FMwebp_.jpg', # Lakme
-            'https://m.media-amazon.com/images/I/41e06O0BqIL._SX300_SY300_QL70_FMwebp_.jpg', # Biotique
-            'https://m.media-amazon.com/images/I/41KlsJ16fIL._SX300_SY300_QL70_FMwebp_.jpg', # Mamaearth
-            'https://m.media-amazon.com/images/I/41e06O0BqIL._SX300_SY300_QL70_FMwebp_.jpg', # Biotique
-            'https://m.media-amazon.com/images/I/41e06O0BqIL._SX300_SY300_QL70_FMwebp_.jpg'  # Biotique
+        'ProductName': [
+            'Lakme Lumi Lit Cream', 
+            'Biotique Bio Sandalwood Sunscreen SPF 50', 
+            'Mamaearth Ubtan Face Wash', 
+            'Biotique Bio Sandalwood Sunscreen SPF 50', 
+            'Lakme Lumi Lit Cream', 
+            'Lakme Lumi Lit Cream', 
+            'Mamaearth Ubtan Face Wash'
         ],
-        'BasePrice': [262.00, 247.00, 262.00, 215.00, 247.00, 215.00, 215.00],
-        'StarRating': [4.3, 4.1, 4.3, 4.2, 4.1, 4.2, 4.2],
-        'TotalReviews': [14205, 8540, 14205, 12300, 8540, 12300, 12300],
+        'ImageURL': [
+            'https://m.media-amazon.com/images/I/51wUqFhQWjL.jpg', # Lakme
+            'https://m.media-amazon.com/images/I/51nO60K3jYL.jpg', # Biotique
+            'https://m.media-amazon.com/images/I/51n2xK+2cTL.jpg', # Mamaearth
+            'https://m.media-amazon.com/images/I/51nO60K3jYL.jpg', # Biotique
+            'https://m.media-amazon.com/images/I/51wUqFhQWjL.jpg', # Lakme
+            'https://m.media-amazon.com/images/I/51wUqFhQWjL.jpg', # Lakme
+            'https://m.media-amazon.com/images/I/51n2xK+2cTL.jpg'  # Mamaearth
+        ],
+        'BasePrice': [262.00, 215.00, 247.00, 215.00, 262.00, 262.00, 247.00],
+        'StarRating': [4.3, 4.2, 4.1, 4.2, 4.3, 4.3, 4.1],
+        'TotalReviews': [14205, 12300, 8540, 12300, 14205, 14205, 8540],
         'Description': [
             'Lakme Lumi Lit Cream is a lightweight face cream that works as a moisturizer and highlighter in one product. It contains ingredients such as niacinamide and hyaluronic acid, which help hydrate the skin and improve its texture.',
+            'Biotique Sun Shield Sandalwood Ultra Protective Face Lotion SPF 50+ is an Ayurvedic sunscreen designed to protect the skin from harmful UVA and UVB rays. Enriched with natural ingredients such as sandalwood, saffron, and honey.',
             'Mamaearth Ubtan Natural Glow Face Wash is a natural face cleanser formulated with turmeric and saffron, inspired by traditional ubtan skincare. It helps remove dirt, excess oil, and impurities from the skin while promoting a natural glow.',
+            'Biotique Sun Shield Sandalwood Ultra Protective Face Lotion SPF 50+ is an Ayurvedic sunscreen designed to protect the skin from harmful UVA and UVB rays. Enriched with natural ingredients such as sandalwood, saffron, and honey.',
             'Lakme Lumi Lit Cream is a lightweight face cream that works as a moisturizer and highlighter in one product. It contains ingredients such as niacinamide and hyaluronic acid, which help hydrate the skin and improve its texture.',
-            'Biotique Sun Shield Sandalwood Ultra Protective Face Lotion SPF 50+ is an Ayurvedic sunscreen designed to protect the skin from harmful UVA and UVB rays. Enriched with natural ingredients such as sandalwood, saffron, and honey.',
-            'Mamaearth Ubtan Natural Glow Face Wash is a natural face cleanser formulated with turmeric and saffron, inspired by traditional ubtan skincare. It helps remove dirt, excess oil, and impurities from the skin while promoting a natural glow.',
-            'Biotique Sun Shield Sandalwood Ultra Protective Face Lotion SPF 50+ is an Ayurvedic sunscreen designed to protect the skin from harmful UVA and UVB rays. Enriched with natural ingredients such as sandalwood, saffron, and honey.',
-            'Biotique Sun Shield Sandalwood Ultra Protective Face Lotion SPF 50+ is an Ayurvedic sunscreen designed to protect the skin from harmful UVA and UVB rays. Enriched with natural ingredients such as sandalwood, saffron, and honey.'
+            'Lakme Lumi Lit Cream is a lightweight face cream that works as a moisturizer and highlighter in one product. It contains ingredients such as niacinamide and hyaluronic acid, which help hydrate the skin and improve its texture.',
+            'Mamaearth Ubtan Natural Glow Face Wash is a natural face cleanser formulated with turmeric and saffron, inspired by traditional ubtan skincare. It helps remove dirt, excess oil, and impurities from the skin while promoting a natural glow.'
         ],
         'KeyBenefits': [
             'Moisturizes and hydrates the skin\nProvides instant glow and radiance\nCan be used as a primer or daily cream',
+            'Protects skin from harmful UV rays\nPrevents sunburn and tanning\nKeeps skin soft and moisturized',
             'Cleanses dirt and oil from the skin\nHelps remove tan and brighten skin\nContains natural ingredients like turmeric and saffron',
+            'Protects skin from harmful UV rays\nPrevents sunburn and tanning\nKeeps skin soft and moisturized',
             'Moisturizes and hydrates the skin\nProvides instant glow and radiance\nCan be used as a primer or daily cream',
-            'Protects skin from harmful UV rays\nPrevents sunburn and tanning\nKeeps skin soft and moisturized',
-            'Cleanses dirt and oil from the skin\nHelps remove tan and brighten skin\nContains natural ingredients like turmeric and saffron',
-            'Protects skin from harmful UV rays\nPrevents sunburn and tanning\nKeeps skin soft and moisturized',
-            'Protects skin from harmful UV rays\nPrevents sunburn and tanning\nKeeps skin soft and moisturized'
+            'Moisturizes and hydrates the skin\nProvides instant glow and radiance\nCan be used as a primer or daily cream',
+            'Cleanses dirt and oil from the skin\nHelps remove tan and brighten skin\nContains natural ingredients like turmeric and saffron'
         ]
     }
     df = pd.DataFrame(data)
@@ -88,7 +96,7 @@ purpose = st.sidebar.radio("Purpose:", ["For Myself", "As a Gift"])
 season = st.sidebar.selectbox("Current Season:", ["Summer", "Monsoon", "Winter"])
 
 # --- Main Storefront UI ---
-# Determine which product to show based on the persona selected
+# Grab the very first row for the selected persona so the products map correctly
 user_data = df[df['UserID'] == sample_user].iloc[0]
 base_price_inr = user_data['BasePrice']
 
@@ -99,7 +107,10 @@ st.caption(f"Based on your **{skin_type}** skin during the **{season}** season")
 col_img, col_info = st.columns([1, 2.5])
 
 with col_img:
-    st.image(user_data['ImageURL'], width=250)
+    try:
+        st.image(user_data['ImageURL'], width=250)
+    except Exception:
+        st.info("Product Image Unavailable")
 
 with col_info:
     st.markdown(f"## {user_data['ProductName']}")
@@ -110,7 +121,6 @@ with col_info:
     with st.expander("📝 Product Description", expanded=True):
         st.write(user_data['Description'])
         st.markdown("**Key Benefits:**")
-        # Split the string of benefits into bullet points
         for benefit in user_data['KeyBenefits'].split('\n'):
             st.markdown(f"- {benefit}")
     
