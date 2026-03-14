@@ -25,7 +25,6 @@ st.markdown("### Context-Aware Retail with Algorithmic Nutrition Labels")
 # --- Load Indian Market Data ---
 @st.cache_resource
 def load_data():
-    # Reordered so User 1 = Lakme, User 2 = Biotique, User 3 = Mamaearth
     data = {
         'UserID': ['User_01', 'User_02', 'User_03', 'User_01', 'User_02', 'User_03', 'User_01'],
         'ProductID': ['P1', 'P3', 'P2', 'P3', 'P1', 'P1', 'P2'],
@@ -40,13 +39,13 @@ def load_data():
             'Mamaearth Ubtan Face Wash'
         ],
         'ImageURL': [
-            'https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Cream_in_a_jar.jpg/320px-Cream_in_a_jar.jpg', # Generic Cream (Lakme)
-            'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Sunscreen_Lotion.jpg/320px-Sunscreen_Lotion.jpg', # Generic Sunscreen (Biotique)
-            'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Face_wash_tube.jpg/320px-Face_wash_tube.jpg', # Generic Face Wash (Mamaearth)
-            'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Sunscreen_Lotion.jpg/320px-Sunscreen_Lotion.jpg', 
-            'https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Cream_in_a_jar.jpg/320px-Cream_in_a_jar.jpg', 
-            'https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Cream_in_a_jar.jpg/320px-Cream_in_a_jar.jpg', 
-            'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Face_wash_tube.jpg/320px-Face_wash_tube.jpg'  
+            'https://m.media-amazon.com/images/I/41-lUu5W8xL.jpg', # Lakme
+            'https://m.media-amazon.com/images/I/41e06O0BqIL.jpg', # Biotique
+            'https://m.media-amazon.com/images/I/41KlsJ16fIL.jpg', # Mamaearth
+            'https://m.media-amazon.com/images/I/41e06O0BqIL.jpg', # Biotique
+            'https://m.media-amazon.com/images/I/41-lUu5W8xL.jpg', # Lakme
+            'https://m.media-amazon.com/images/I/41-lUu5W8xL.jpg', # Lakme
+            'https://m.media-amazon.com/images/I/41KlsJ16fIL.jpg'  # Mamaearth
         ],
         'BasePrice': [262.00, 215.00, 247.00, 215.00, 262.00, 262.00, 247.00],
         'StarRating': [4.3, 4.2, 4.1, 4.2, 4.3, 4.3, 4.1],
@@ -106,12 +105,8 @@ st.caption(f"Based on your **{skin_type}** skin during the **{season}** season")
 col_img, col_info = st.columns([1, 2.5])
 
 with col_img:
-    try:
-        # Provide a fallback just in case
-        st.image(user_data['ImageURL'], width=200, use_container_width=True)
-    except Exception:
-        # Display an emoji placeholder if the image fails
-        st.markdown(f"<div style='text-align: center; font-size: 80px; background-color: #f0f2f6; border-radius: 10px; padding: 20px;'>🧴</div>", unsafe_allow_html=True)
+    # THE FIX: Using raw HTML so your web browser fetches the image, not Python!
+    st.markdown(f'<img src="{user_data["ImageURL"]}" width="100%" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">', unsafe_allow_html=True)
 
 with col_info:
     st.markdown(f"## {user_data['ProductName']}")
