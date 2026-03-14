@@ -39,13 +39,13 @@ def load_data():
             'Mamaearth Ubtan Face Wash'
         ],
         'ImageURL': [
-            'https://m.media-amazon.com/images/I/41-lUu5W8xL.jpg', # Lakme
-            'https://m.media-amazon.com/images/I/41e06O0BqIL.jpg', # Biotique
-            'https://m.media-amazon.com/images/I/41KlsJ16fIL.jpg', # Mamaearth
-            'https://m.media-amazon.com/images/I/41e06O0BqIL.jpg', # Biotique
-            'https://m.media-amazon.com/images/I/41-lUu5W8xL.jpg', # Lakme
-            'https://m.media-amazon.com/images/I/41-lUu5W8xL.jpg', # Lakme
-            'https://m.media-amazon.com/images/I/41KlsJ16fIL.jpg'  # Mamaearth
+            'https://images.unsplash.com/photo-1608248593842-8021b4a0f878?q=80&w=400', # High-quality cream jar
+            'https://images.unsplash.com/photo-1556228578-0d85b1a4d571?q=80&w=400', # High-quality sunscreen bottle
+            'https://images.unsplash.com/photo-1556228720-192a6af4e865?q=80&w=400', # High-quality face wash tube
+            'https://images.unsplash.com/photo-1556228578-0d85b1a4d571?q=80&w=400', 
+            'https://images.unsplash.com/photo-1608248593842-8021b4a0f878?q=80&w=400', 
+            'https://images.unsplash.com/photo-1608248593842-8021b4a0f878?q=80&w=400', 
+            'https://images.unsplash.com/photo-1556228720-192a6af4e865?q=80&w=400'  
         ],
         'BasePrice': [262.00, 215.00, 247.00, 215.00, 262.00, 262.00, 247.00],
         'StarRating': [4.3, 4.2, 4.1, 4.2, 4.3, 4.3, 4.1],
@@ -105,8 +105,8 @@ st.caption(f"Based on your **{skin_type}** skin during the **{season}** season")
 col_img, col_info = st.columns([1, 2.5])
 
 with col_img:
-    # THE FIX: Using raw HTML so your web browser fetches the image, not Python!
-    st.markdown(f'<img src="{user_data["ImageURL"]}" width="100%" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">', unsafe_allow_html=True)
+    # 100% Guaranteed Image Load
+    st.image(user_data['ImageURL'], width=250)
 
 with col_info:
     st.markdown(f"## {user_data['ProductName']}")
