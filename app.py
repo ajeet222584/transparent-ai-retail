@@ -40,13 +40,13 @@ def load_data():
             'Mamaearth Ubtan Face Wash'
         ],
         'ImageURL': [
-            'https://m.media-amazon.com/images/I/51wUqFhQWjL.jpg', # Lakme
-            'https://m.media-amazon.com/images/I/51nO60K3jYL.jpg', # Biotique
-            'https://m.media-amazon.com/images/I/51n2xK+2cTL.jpg', # Mamaearth
-            'https://m.media-amazon.com/images/I/51nO60K3jYL.jpg', # Biotique
-            'https://m.media-amazon.com/images/I/51wUqFhQWjL.jpg', # Lakme
-            'https://m.media-amazon.com/images/I/51wUqFhQWjL.jpg', # Lakme
-            'https://m.media-amazon.com/images/I/51n2xK+2cTL.jpg'  # Mamaearth
+            'https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Cream_in_a_jar.jpg/320px-Cream_in_a_jar.jpg', # Generic Cream (Lakme)
+            'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Sunscreen_Lotion.jpg/320px-Sunscreen_Lotion.jpg', # Generic Sunscreen (Biotique)
+            'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Face_wash_tube.jpg/320px-Face_wash_tube.jpg', # Generic Face Wash (Mamaearth)
+            'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Sunscreen_Lotion.jpg/320px-Sunscreen_Lotion.jpg', 
+            'https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Cream_in_a_jar.jpg/320px-Cream_in_a_jar.jpg', 
+            'https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Cream_in_a_jar.jpg/320px-Cream_in_a_jar.jpg', 
+            'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Face_wash_tube.jpg/320px-Face_wash_tube.jpg'  
         ],
         'BasePrice': [262.00, 215.00, 247.00, 215.00, 262.00, 262.00, 247.00],
         'StarRating': [4.3, 4.2, 4.1, 4.2, 4.3, 4.3, 4.1],
@@ -96,25 +96,25 @@ purpose = st.sidebar.radio("Purpose:", ["For Myself", "As a Gift"])
 season = st.sidebar.selectbox("Current Season:", ["Summer", "Monsoon", "Winter"])
 
 # --- Main Storefront UI ---
-# Grab the very first row for the selected persona so the products map correctly
 user_data = df[df['UserID'] == sample_user].iloc[0]
 base_price_inr = user_data['BasePrice']
 
 st.subheader("✨ Recommended for You")
 st.caption(f"Based on your **{skin_type}** skin during the **{season}** season")
 
-# Layout to look like Amazon/Flipkart
+# Layout
 col_img, col_info = st.columns([1, 2.5])
 
 with col_img:
     try:
-        st.image(user_data['ImageURL'], width=250)
+        # Provide a fallback just in case
+        st.image(user_data['ImageURL'], width=200, use_container_width=True)
     except Exception:
-        st.info("Product Image Unavailable")
+        # Display an emoji placeholder if the image fails
+        st.markdown(f"<div style='text-align: center; font-size: 80px; background-color: #f0f2f6; border-radius: 10px; padding: 20px;'>🧴</div>", unsafe_allow_html=True)
 
 with col_info:
     st.markdown(f"## {user_data['ProductName']}")
-    # Fake Star Rating Display
     st.write(f"⭐⭐⭐⭐⭐ **{user_data['StarRating']}** ({user_data['TotalReviews']:,} ratings)")
     st.markdown(f"#### MRP: ₹{base_price_inr:.2f}")
     
@@ -134,10 +134,9 @@ with col1:
     share_history = st.toggle("Share my Purchase History", value=True)
     share_behavior = st.toggle("Share my Rating Behavior", value=True)
 
-# Calculate discount logic (Max 20% discount if they share everything)
 discount_pct = 0
-if share_history: discount_pct += 0.12 # 12% off
-if share_behavior: discount_pct += 0.08 # 8% off
+if share_history: discount_pct += 0.12 
+if share_behavior: discount_pct += 0.08 
 
 discount_inr = base_price_inr * discount_pct
 final_price_inr = base_price_inr - discount_inr
