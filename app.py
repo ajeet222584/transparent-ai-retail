@@ -25,6 +25,7 @@ st.markdown("### Context-Aware Retail with Algorithmic Nutrition Labels")
 # --- Load Indian Market Data ---
 @st.cache_resource
 def load_data():
+    # Using the local files you uploaded to GitHub!
     data = {
         'UserID': ['User_01', 'User_02', 'User_03', 'User_01', 'User_02', 'User_03', 'User_01'],
         'ProductID': ['P1', 'P3', 'P2', 'P3', 'P1', 'P1', 'P2'],
@@ -39,13 +40,13 @@ def load_data():
             'Mamaearth Ubtan Face Wash'
         ],
         'ImageURL': [
-            'https://dummyimage.com/400x400/ffe4e1/000000&text=Lakme+Lumi+Cream', # Rose Pink Placeholder
-            'https://dummyimage.com/400x400/ffefd5/000000&text=Biotique+Sunscreen', # Sandalwood Placeholder
-            'https://dummyimage.com/400x400/f5fffa/000000&text=Mamaearth+Face+Wash', # Mint Green Placeholder
-            'https://dummyimage.com/400x400/ffefd5/000000&text=Biotique+Sunscreen', 
-            'https://dummyimage.com/400x400/ffe4e1/000000&text=Lakme+Lumi+Cream', 
-            'https://dummyimage.com/400x400/ffe4e1/000000&text=Lakme+Lumi+Cream', 
-            'https://dummyimage.com/400x400/f5fffa/000000&text=Mamaearth+Face+Wash'  
+            'lakme.jpg', 
+            'biotique.jpg', 
+            'mamaearth.jpg', 
+            'biotique.jpg', 
+            'lakme.jpg', 
+            'lakme.jpg', 
+            'mamaearth.jpg'  
         ],
         'BasePrice': [262.00, 215.00, 247.00, 215.00, 262.00, 262.00, 247.00],
         'StarRating': [4.3, 4.2, 4.1, 4.2, 4.3, 4.3, 4.1],
@@ -105,7 +106,11 @@ st.caption(f"Based on your **{skin_type}** skin during the **{season}** season")
 col_img, col_info = st.columns([1, 2.5])
 
 with col_img:
-    st.image(user_data['ImageURL'], width=250)
+    try:
+        # Streamlit will automatically look for these files in the GitHub repo
+        st.image(user_data['ImageURL'], width=250)
+    except Exception as e:
+        st.error(f"Waiting for GitHub to sync images... ({e})")
 
 with col_info:
     st.markdown(f"## {user_data['ProductName']}")
@@ -180,7 +185,6 @@ if st.session_state['purchased']:
         
         if st.form_submit_button("Submit Survey & Save Data"):
             try:
-                # Push ALL data to Supabase
                 supabase.table('user_interactions').insert({
                     "session_id": st.session_state['session_id'],
                     "shared_history": share_history,
